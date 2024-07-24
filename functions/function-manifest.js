@@ -3,15 +3,15 @@ const tools = [
     type: 'function',
     function: {
       name: 'checkInventory',
-      say: 'Deixe-me verificar nosso inventário agora mesmo.',
-      description: 'Verifica o inventário de diferentes modelos de AirPods: AirPods, AirPods Pro ou AirPods Max.',
+      say: 'Let me check our inventory right now.',
+      description: 'Checks the inventory of different AirPods models: AirPods, AirPods Pro, or AirPods Max.',
       parameters: {
         type: 'object',
         properties: {
           model: {
             type: 'string',
             'enum': ['airpods', 'airpods pro', 'airpods max'],
-            description: 'O modelo de AirPods, seja AirPods, AirPods Pro ou AirPods Max.',
+            description: 'The model of AirPods, either AirPods, AirPods Pro, or AirPods Max.',
           },
         },
         required: ['model'],
@@ -21,7 +21,7 @@ const tools = [
         properties: {
           stock: {
             type: 'integer',
-            description: 'Um número inteiro que contém quantos modelos estão atualmente em estoque.'
+            description: 'An integer that indicates how many models are currently in stock.'
           }
         }
       }
@@ -31,15 +31,15 @@ const tools = [
     type: 'function',
     function: {
       name: 'checkPrice',
-      say: 'Deixe-me verificar o preço, um momento.',
-      description: 'Verifica o preço do modelo fornecido de AirPods, AirPods Pro ou AirPods Max.',
+      say: 'Let me check the price, one moment.',
+      description: 'Checks the price of the provided model of AirPods, AirPods Pro, or AirPods Max.',
       parameters: {
         type: 'object',
         properties: {
           model: {
             type: 'string',
             'enum': ['airpods', 'airpods pro', 'airpods max'],
-            description: 'O modelo de AirPods, seja AirPods, AirPods Pro ou AirPods Max.',
+            description: 'The model of AirPods, either AirPods, AirPods Pro, or AirPods Max.',
           },
         },
         required: ['model'],
@@ -49,7 +49,7 @@ const tools = [
         properties: {
           price: {
             type: 'integer',
-            description: 'O preço do modelo.'
+            description: 'The price of the model.'
           }
         }
       }
@@ -59,19 +59,19 @@ const tools = [
     type: 'function',
     function: {
       name: 'placeOrder',
-      say: 'Tudo bem, vou registrar isso em nosso sistema.',
-      description: 'Faz um pedido de um conjunto de AirPods.',
+      say: 'Alright, I will register this in our system.',
+      description: 'Places an order for a set of AirPods.',
       parameters: {
         type: 'object',
         properties: {
           model: {
             type: 'string',
             'enum': ['airpods', 'airpods pro'],
-            description: 'O modelo de AirPods, seja o regular ou Pro.',
+            description: 'The model of AirPods, either regular or Pro.',
           },
           quantity: {
             type: 'integer',
-            description: 'O número de AirPods que desejam pedir.',
+            description: 'The number of AirPods to order.',
           },
         },
         required: ['model', 'quantity'],
@@ -81,11 +81,11 @@ const tools = [
         properties: {
           price: {
             type: 'integer',
-            description: 'O preço total do pedido, incluindo impostos.'
+            description: 'The total price of the order, including taxes.'
           },
           orderNumber: {
             type: 'integer',
-            description: 'O número do pedido associado ao pedido.'
+            description: 'The order number associated with the order.'
           }
         }
       }
@@ -95,14 +95,14 @@ const tools = [
     type: 'function',
     function: {
       name: 'transferCall',
-      say: 'Um momento enquanto eu transfiro sua ligação.',
-      description: 'Transfere o cliente para um atendente ao vivo caso solicite ajuda de uma pessoa real.',
+      say: 'One moment while I transfer your call.',
+      description: 'Transfers the customer to a live agent if they request help from a real person.',
       parameters: {
         type: 'object',
         properties: {
           callSid: {
             type: 'string',
-            description: 'O identificador único para a chamada telefônica ativa.',
+            description: 'The unique identifier for the active phone call.',
           },
         },
         required: ['callSid'],
@@ -112,7 +112,7 @@ const tools = [
         properties: {
           status: {
             type: 'string',
-            description: 'Se a chamada do cliente foi transferida com sucesso ou não.'
+            description: 'Indicates whether the customer call was successfully transferred or not.'
           },
         }
       }

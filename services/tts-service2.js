@@ -1,115 +1,33 @@
-require('dotenv').config();
-const { Buffer } = require('node:buffer');
-const EventEmitter = require('events');
-const WebSocket = require('ws');
+const utcDateStr = '2024-07-19T14:00:00Z';
 
-// ... existing code ...
+// Create a Date object from the UTC string
+const utcDate = new Date(utcDateStr);
 
-class TextToSpeechService extends EventEmitter {
-  constructor() {
-    super();
-    this.nextExpectedIndex = 0;
-    this.speechBuffer = {};
-  }
+// Define the options for the date format, specifying the time zone as 'America/Sao_Paulo'
+const options = {
+  timeZone: 'America/Sao_Paulo',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+  timeZoneName: 'short'
+};
 
-  async generate(gptReply, interactionCount) {
-    const { partialResponseIndex, partialResponse } = gptReply;
-    const voiceId = 'JNI7HKGyqNaHqfihNoCi';
-    const uri = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream-input?model_id=eleven_monolingual_v1&output_format=ulaw_8000&optimize_streaming_latency=4`;
+// Format the date to Brazil's time zone
+const formatter = new Intl.DateTimeFormat('en-US', options);
+const parts = formatter.formatToParts(utcDate);
 
-    const ws = new WebSocket(uri, {
-      headers: {
-        'xi-api-key': process.env.XI_API_KEY, // Ensure this is set correctly in your .env file
-        'Content-Type': 'application/json',
-      },
-    });
+// Extract the formatted parts
+const dateParts = {};
+parts.forEach(({ type, value }) => {
+  dateParts[type] = value;
+});
 
-    ws.on('open', () => {
-      ws.send(JSON.stringify({
-        text: ' ',
-        voice_settings: {
-          stability: 1,
-          similarity_boost: true,
-        },
-        xi_api_key: process.env.XI_API_KEY,
-      }));
+// Construct the ISO 8601 string with the correct offset
+const brazilTimeISO = `${dateParts.year}-${dateParts.month}-${dateParts.day}T${dateParts.hour}:${dateParts.minute}:${dateParts.second}${dateParts.timeZoneName}`;
 
-      // Send the initial text
-      ws.send(JSON.stringify({
-        text: partialResponse,
-        try_trigger_generation: true,
-      }));
-    });
-
-    ws.on('message', (data) => {
-      const message = JSON.parse(data);
-      if (message.audio) {
-        this.emit('speech', partialResponseIndex, Buffer.from(message.audio, 'base64').toString('base64'), partialResponse, interactionCount);
-      } else if (message.isFinal) {
-        ws.close();
-      }
-    });
-
-    ws.on('error', (err) => {
-      console.error('WebSocket error:', err);
-    });
-
-    ws.on('close', () => {
-      console.log('WebSocket connection closed');
-    });
-  }
-
-  async streamText(textIterator, interactionCount) {
-    const voiceId = 'JNI7HKGyqNaHqfihNoCi';
-    const uri = `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream-input?model_id=eleven_monolingual_v1&output_format=ulaw_8000&optimize_streaming_latency=4`;
-
-    const ws = new WebSocket(uri, {
-      headers: {
-        'xi-api-key': process.env.XI_API_KEY, // Ensure this is set correctly in your .env file
-        'Content-Type': 'application/json',
-      },
-    });
-
-    ws.on('open', async () => {
-      ws.send(JSON.stringify({
-        text: ' ',
-        voice_settings: {
-          stability: 1,
-          similarity_boost: true,
-        },
-        xi_api_key: process.env.XI_API_KEY,
-      }));
-
-      for await (const textChunk of textIterator) {
-        ws.send(JSON.stringify({
-          text: textChunk,
-          try_trigger_generation: true,
-        }));
-      }
-
-      ws.send(JSON.stringify({
-        text: '',
-        try_trigger_generation: true,
-      }));
-    });
-
-    ws.on('message', (data) => {
-      const message = JSON.parse(data);
-      if (message.audio) {
-        this.emit('speech', Buffer.from(message.audio, 'base64').toString('base64'), interactionCount);
-      } else if (message.isFinal) {
-        ws.close();
-      }
-    });
-
-    ws.on('error', (err) => {
-      console.error('WebSocket error:', err);
-    });
-
-    ws.on('close', () => {
-      console.log('WebSocket connection closed');
-    });
-  }
-}
-
-module.exports = { TextToSpeechService };
+console.log(`UTC Time: ${utcDateStr}`);
+console.log(`Brazil Time: ${brazilTimeISO}`);

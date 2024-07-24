@@ -31,7 +31,7 @@ class TextToSpeechService extends EventEmitter {
               model_id: 'eleven_multilingual_v2',
               text: partialResponse,
               voice_settings: {
-                stability: 0.3,
+                stability: 0.6, 
                 similarity_boost: 0.8,
                 style_exaggeration: 0.3,
               },

@@ -15,7 +15,7 @@ class TranscriptionService extends EventEmitter {
       punctuate: true,
       interim_results: true,
       endpointing: 200,
-      utterance_end_ms: 3000,
+      utterance_end_ms: 5000,
       language: 'pt-BR'
     });
 
