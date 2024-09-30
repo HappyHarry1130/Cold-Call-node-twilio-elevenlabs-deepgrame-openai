@@ -1,5 +1,4 @@
-require('dotenv').config();
-require('colors');
+
 
 const express = require('express');
 const ExpressWs = require('express-ws');
