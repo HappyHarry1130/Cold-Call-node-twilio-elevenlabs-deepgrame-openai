@@ -2,10 +2,8 @@ require('colors');
 const EventEmitter = require('events');
 const OpenAI = require('openai');
 const tools = require('../functions/function-manifest');
-const { SocksProxyAgent } = require('socks-proxy-agent');
-const agent = new SocksProxyAgent('socks5://14aa439fa63ae:b35b9f9acc@185.101.105.184:12324');
-// Import all functions included in function manifest
-// Note: the function name and file name must be the same
+
+
 const availableFunctions = {};
 tools.forEach((tool) => {
   let functionName = tool.function.name;
@@ -13,97 +11,43 @@ tools.forEach((tool) => {
 });
 
 const openaikey = process.env.OPENAI_API_KEY;
+
+
 class GptService extends EventEmitter {
   constructor() {
     super();
-    this.openai = new OpenAI({ apiKey: openaikey, httpAgent: agent });
-    this.userContext = [{'role': 'system', 'content':''},{'role': 'assistant', 'content':''},];
-//     this.userContext = [
-//       {
-//         'role': 'system', 'content': `"Seu nome   Brandon. Voc  deve ter uma conversa agrad vel com a pessoa com quem est  falando. Assim que a pessoa come ar a falar, interrompa-a e espere at  que ela termine de falar antes de continuar a conversa.
-
-// Como vendedor da empresa "HARRY", voc  tem que explicar o produto em detalhes para a pessoa. O produto da empresa   um celular que liderar  a pr xima gera  o.
-// Custa apenas US$ 500.
-// Se a pessoa disser que   caro, voc  deve inform -la de que est  disposto a discutir o pre o com ela.
-// E nossa empresa   uma empresa digital, ent o tamb m vendemos muitos outros produtos eletr nicos.
-// Voc  pode dar exemplos de dispositivos eletr nicos gerais.
-// Voc  tamb m deve sugerir que pode fornecer um servi o especial ao cliente.
-// Voc  deve conduzir a conversa com o cliente de maneira amig vel.
-// Voc  deve ser jovem e en rgico, mas n o rude.
-// Voc  deve responder apropriadamente e rapidamente, mesmo quando a conversa n o tiver nada a ver com o produto.
-// Por exemplo, se a pessoa disser que seu nome   "Cola", voc  deve dizer "Ol , Cola".
-// N o pergunte mais do que 2-3 frases por vez. Al m disso, suas respostas devem ser as mais curtas poss veis.
-// Explique   outra pessoa que o pre o   baixo, mas a qualidade   alta. Al m disso, se a outra pessoa fizer uma pergunta casual, responda adequadamente.
-// Por exemplo, se a outra pessoa perguntar sobre sua idade, voc  pode responder como "Minha idade   um segredo" ou "Tenho 30 anos". Al m disso, se a outra pessoa pedir informa  es sobre o pre o,
-// voc  pode dizer algo como "Por favor, me diga seu or amento e eu encontrarei um produto que se encaixe nele".
-// E voc  deve lev -los a falar sobre seus produtos o m ximo poss vel.
-// Para aumentar os lucros da sua empresa e adquirir mais clientes, voc  deve conversar muito com seus clientes.
-// No entanto, voc  n o deve falar consigo mesmo de uma vez.
-//   mais importante ter uma conversa com seus clientes.
-// Voc  deve se conectar com seus clientes emocionalmente.
-// Voc  deve tecer bem a conversa para que o cliente nunca se sinta entediado.
-// Voc  tamb m deve responder rapidamente para que o cliente sinta que voc    uma pessoa real.
-// Voc  deve sempre falar com o cliente at  que ele desligue o telefone.
-// Quando o cliente se despedir, voc  deve se despedir apropriadamente. Por exemplo, se um cliente disser "foi bom falar com voc ", voc  pode dizer "eu tamb m. tenha um bom dia".
-// Voc  deve responder a todas as perguntas e respostas em tempo h bil durante a conversa com o cliente. Mesmo que a liga  o dure 10 minutos, 20 minutos ou mais, voc  deve responder de forma r pida e precisa.
-// Voc  deve focar tudo em explicar por que sua empresa   boa e manter o cliente no telefone at  que ele desligue.
-// Voc  deve falar apenas portugu s.`},
-      
-
-// {
-//         'role': 'assistant', 'content': `Seu nome   Brandon. Voc  deve ter uma conversa agrad vel com a pessoa com quem est  falando. Assim que a pessoa come ar a falar, interrompa-a e espere at  que ela termine de falar antes de continuar a conversa.
-
-// Como vendedor da empresa "HARRY", voc  tem que explicar o produto em detalhes para a pessoa. O produto da empresa   um celular que liderar  a pr xima gera  o.
-// Custa apenas US$ 500.
-// Se a pessoa disser que   caro, voc  deve inform -la de que est  disposto a discutir o pre o com ela.
-// E nossa empresa   uma empresa digital, ent o tamb m vendemos muitos outros produtos eletr nicos.
-// Voc  pode dar exemplos de dispositivos eletr nicos gerais.
-// Voc  tamb m deve sugerir que pode fornecer um servi o especial ao cliente.
-// Voc  deve conduzir a conversa com o cliente de maneira amig vel.
-// Voc  deve ser jovem e en rgico, mas n o rude.
-// Voc  deve responder apropriadamente e rapidamente, mesmo quando a conversa n o tiver nada a ver com o produto.
-// Por exemplo, se a pessoa disser que seu nome   "Cola", voc  deve dizer "Ol , Cola".
-// N o pergunte mais do que 2-3 frases por vez. Al m disso, suas respostas devem ser as mais curtas poss veis.
-// Explique   outra pessoa que o pre o   baixo, mas a qualidade   alta. Al m disso, se a outra pessoa fizer uma pergunta casual, responda adequadamente.
-// Por exemplo, se a outra pessoa perguntar sobre sua idade, voc  pode responder como "Minha idade   um segredo" ou "Tenho 30 anos". Al m disso, se a outra pessoa pedir informa  es sobre o pre o,
-// voc  pode dizer algo como "Por favor, me diga seu or amento e eu encontrarei um produto que se encaixe nele".
-// E voc  deve lev -los a falar sobre seus produtos o m ximo poss vel.
-// Para aumentar os lucros da sua empresa e adquirir mais clientes, voc  deve conversar muito com seus clientes.
-// No entanto, voc  n o deve falar consigo mesmo de uma vez.
-//   mais importante ter uma conversa com seus clientes.
-// Voc  deve se conectar com seus clientes emocionalmente.
-// Voc  deve tecer bem a conversa para que o cliente nunca se sinta entediado.
-// Voc  tamb m deve responder rapidamente para que o cliente sinta que voc    uma pessoa real.
-// Voc  deve sempre falar com o cliente at  que ele desligue o telefone.
-// Quando o cliente se despedir, voc  deve se despedir apropriadamente. Por exemplo, se um cliente disser "foi bom falar com voc ", voc  pode dizer "eu tamb m. tenha um bom dia".
-// Voc  deve responder a todas as perguntas e respostas em tempo h bil durante a conversa com o cliente. Mesmo que a liga  o dure 10 minutos, 20 minutos ou mais, voc  deve responder de forma r pida e precisa.
-// Voc  deve focar tudo em explicar por que sua empresa   boa e manter o cliente no telefone at  que ele desligue.
-// Voc  deve falar apenas portugu s.` },
-//     ],
-      this.partialResponseIndex = 0;
+    this.openai = new OpenAI({ apiKey: openaikey });
+    this.userContext = [{'role': 'system', 'content':''},{'role': 'assistant', 'content':''}];
+    this.partialResponseIndex = 0;
+    this.activeStreams = {};
   }
 
-  // Add the callSid to the chat context in case
-  // ChatGPT decides to transfer the call.
   setCallSid(callSid) {
     this.userContext.push({ 'role': 'system', 'content': `callSid: ${callSid}` });
   }
 
-  setUserContext(content, todo, notodo, avaliable_times_info, contact) {
-    this.userContext.push({ 'role': 'system', 'content': `Você deve seguir o fluxo da conversa nas seguintes etapas:'${content}'` });
-    this.userContext.push({ 'role': 'user', 'content': `You must use this contact information.: ${contact}` });
-    this.userContext.push({ 'role': 'system', 'content': `You must speak only Portuguese. ${todo}` });
-    this.userContext.push({ 'role': 'system', 'content': `Você nunca deve falar sobre “AirPods” ${notodo}` });
-    this.userContext.push({ 'role': 'system', 'content': `The available times for reservations with users are: ${avaliable_times_info}
-                            You cannot make reservations at any other time than these, 
-                            so you should discuss this with the user and make reservations at ${avaliable_times_info}` });
+  setUserContext(content, todo, notodo, avaliable_times_info, fullname, ai_profile_name) {
+        this.userContext.push({ 'role': 'system', 'content': `Utilize este script para engajar em conversas com seus usuários: '${content}'.
+                          Você deve fornecer informações corretas de contato, como nome, empresa, posição, etc.` });  
+    this.userContext.push({ 'role': 'system', 'content': `You should keep your response short, in 1-2 sentences. Você deve falar apenas em português (Brasil) e toda a conversa deve parecer com a de um ser humano real então converse como se fosse um. ${todo}` });
+    this.userContext.push({ 'role': 'system', 'content': `Você nunca deve falar 'símbolos' como '[], {}, #'. Você nunca deve falar sobre “AirPods".
+                            Não usar palavras como um, ahh, ehh, ééé, humm, hmm. Quando disser a data, deve dizer o mês, dia, hora e minuto. Não diga o dia da semana.
+                            Por exemplo, em vez de dizer "é sexta-feira às 10h", se sexta-feira for 3 de agosto, diga "é 3 de agosto às 10 horas".
+                            Não repita suas respostas e não repita pergunta a não ser que peça por favor para você repetir. sempre aguarde a resposta da pergunta para da continuidade. 
+                            Você nunca deve fazer um som que seja entediante ou que não seja um som humano.
+                            Nunca repita perguntas no início ${notodo}` });
+    this.userContext.push({ 'role': 'system', 'content': `O nome do usuário é ${fullname} e seu nome é ${ai_profile_name}` });
+    this.userContext.push({ 'role': 'system', 'content': `${avaliable_times_info} você pode sugerir duas opções ao usuário para agendar usando esses horários disponíveis. Mas precisamos oferecer ao usuário 3 horas a menos.
+                            Por exemplo, se 10 horas em 5 de agosto e 17 horas em 7 de agosto foram selecionados, os horários que você usaria para conversas seriam 7 horas em 5 de agosto e 14 horas em 7 de agosto.
+                            Além disso, o horário deve ser entre 9:00 horas e 19:00 horas.
+                            Nesse caso, ao informar a data, você deve dizer o mês, dia, hora, minuto.` });
   }
+
   validateFunctionArgs(args) {
     try {
       return JSON.parse(args);
     } catch (error) {
-      console.log('Warning: Double function arguments returned by OpenAI:', args);
-      // Seeing an error where sometimes we have two sets of args
+      console.log('Aviso: Argumentos de função duplicados retornados pelo OpenAI:', args);
       if (args.indexOf('{') != args.lastIndexOf('{')) {
         return JSON.parse(args.substring(args.indexOf(''), args.indexOf('}') + 1));
       }
@@ -121,15 +65,23 @@ class GptService extends EventEmitter {
   async completion(text, interactionCount, role = 'user', name = 'user', maxTokens = 100) {
     this.updateUserContext(name, role, text);
 
-    // Step 1: Send user transcription to Chat GPT
+    if (this.activeStreams[interactionCount]) {
+      this.activeStreams[interactionCount].abort = true;
+    }
+
+    const controller = new AbortController();
+    this.activeStreams[interactionCount] = controller;
+    // Passo 1: Enviar a transcrição do usuário para o Chat GPT
     const stream = await this.openai.chat.completions.create({
       model: 'gpt-4o',
       messages: this.userContext,
-      tools: tools,
+      //tools: tools,
       stream: true,
-      //max_tokens: 1000, // Set the maximum number of tokens
+      //max_tokens: 1000, // Define o número máximo de tokens
     });
 
+    this.activeStreams[interactionCount] = { stream, abort: false };
+    
     let completeResponse = '';
     let partialResponse = '';
     let finishReason = '';
@@ -138,11 +90,11 @@ class GptService extends EventEmitter {
       let content = chunk.choices[0]?.delta?.content || '';
       finishReason = chunk.choices[0].finish_reason;
 
-      // We use completeResponse for userContext
+      // Usamos completeResponse para userContext
       completeResponse += content;
-      // We use partialResponse to provide a chunk for TTS
+      // Usamos partialResponse para fornecer um chunk para TTS
       partialResponse += content;
-      // Emit last partial response and add complete response to userContext
+      // Emitir última resposta parcial e adicionar resposta completa ao userContext
       if ([' ', '.', ',', '?', '!', ';', ':', ' ', '-', '(', ')', '[', ']', '}', ' '].includes(content.trim().slice(-1)) || finishReason === 'stop') {
         const gptReply = {
           partialResponseIndex: this.partialResponseIndex,
@@ -155,7 +107,16 @@ class GptService extends EventEmitter {
       }
     }
     this.userContext.push({ 'role': 'assistant', 'content': completeResponse });
-    console.log(`GPT -> user context length: ${this.userContext.length}`.green);
+    console.log(`GPT -> tamanho do user context: ${this.userContext.length}`.green);
+    delete this.activeStreams[interactionCount];
+  }
+
+  stop(interactionCount) {
+    if (this.activeStreams[interactionCount]) {
+      this.activeStreams[interactionCount].abort();
+      delete this.activeStreams[interactionCount];
+      console.log(`Stopping GPT service for interaction ${interactionCount}`);
+    }
   }
 }
 
