@@ -13,7 +13,7 @@ tools.forEach((tool) => {
 const openaikey = process.env.OPENAI_API_KEY;
 
 
-class GptService extends EventEmitter {
+class GptService_Incoming extends EventEmitter {
   constructor() {
     super();
     this.openai = new OpenAI({ apiKey: openaikey });
@@ -26,7 +26,7 @@ class GptService extends EventEmitter {
     this.userContext.push({ 'role': 'system', 'content': `callSid: ${callSid}` });
   }
 
-  setUserContext(content, todo, notodo, avaliable_times_info, fullname, ai_profile_name) {
+  setUserContext(content, todo, notodo, avaliable_times_info) {
         this.userContext.push({ 'role': 'system', 'content': `Utilize este script para engajar em conversas com seus usuários: '${content}'.
                           Você deve fornecer informações corretas de contato, como nome, empresa, posição, etc.` });  
     this.userContext.push({ 'role': 'system', 'content': `You should keep your response short, in 1-2 sentences. Você deve falar apenas em português (Brasil) e toda a conversa deve parecer com a de um ser humano real então converse como se fosse um. ${todo}` });
@@ -36,7 +36,6 @@ class GptService extends EventEmitter {
                             Não repita suas respostas e não repita pergunta a não ser que peça por favor para você repetir. sempre aguarde a resposta da pergunta para da continuidade. 
                             Você nunca deve fazer um som que seja entediante ou que não seja um som humano.
                             Nunca repita perguntas no início ${notodo}` });
-    this.userContext.push({ 'role': 'system', 'content': `O nome do usuário é ${fullname} e seu nome é ${ai_profile_name}` });
     this.userContext.push({ 'role': 'system', 'content': `${avaliable_times_info} você pode sugerir duas opções ao usuário para agendar usando esses horários disponíveis. Mas precisamos oferecer ao usuário 3 horas a menos.
                             Por exemplo, se 10 horas em 5 de agosto e 17 horas em 7 de agosto foram selecionados, os horários que você usaria para conversas seriam 7 horas em 5 de agosto e 14 horas em 7 de agosto.
                             Além disso, o horário deve ser entre 9:00 horas e 19:00 horas.
@@ -75,7 +74,7 @@ class GptService extends EventEmitter {
     const stream = await this.openai.chat.completions.create({
       model: 'gpt-4o',
       messages: this.userContext,
-      //tools: tools,
+      tools: tools,
       stream: true,
       //max_tokens: 1000, // Define o número máximo de tokens
     });
@@ -120,4 +119,4 @@ class GptService extends EventEmitter {
   }
 }
 
-module.exports = { GptService };
+module.exports = { GptService_Incoming };

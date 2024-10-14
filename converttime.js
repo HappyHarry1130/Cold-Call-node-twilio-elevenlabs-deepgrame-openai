@@ -13,21 +13,11 @@ const options = {
   minute: '2-digit',
   second: '2-digit',
   hour12: false,
-  timeZoneName: 'short'
 };
 
 // Format the date to Brazil's time zone
 const formatter = new Intl.DateTimeFormat('en-US', options);
-const parts = formatter.formatToParts(utcDate);
-
-// Extract the formatted parts
-const dateParts = {};
-parts.forEach(({ type, value }) => {
-  dateParts[type] = value;
-});
-
-// Construct the ISO 8601 string with the correct offset
-const brazilTimeISO = `${dateParts.year}-${dateParts.month}-${dateParts.day}T${dateParts.hour}:${dateParts.minute}:${dateParts.second}${dateParts.timeZoneName}`;
+const brazilTime = formatter.format(utcDate);
 
 console.log(`UTC Time: ${utcDateStr}`);
-console.log(`Brazil Time: ${brazilTimeISO}`);
+console.log(`Brazil Time: ${brazilTime}`);

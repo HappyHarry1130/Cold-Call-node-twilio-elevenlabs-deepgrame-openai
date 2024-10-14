@@ -1,0 +1,18 @@
+{
+  "phonenumber": "5548961365737",
+  "todo": "Call back the client",
+  "notodo": "Do not share personal information",
+  "fullname": "John Doe",
+  "ai_profile_name": "Gill",
+  "email": "johndoe@example.com",
+  "company": "Example Corp",
+  "contact_position": "Manager",
+  "contact_company": "Example Corp",
+  "contact_id": "1722703887022x843080806593462300",
+  "voiceId": "YsMzSICQcD8ANXItP7BU",
+  "style_exaggeration": 1.0,
+  "stability": 0.8,
+  "similarity_boost": 0.9,
+  "calendarlink": "http://example.com/calendar",
+  "campaign_id": "1722840799056x482480297004498940"
+}
