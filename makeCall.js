@@ -87,17 +87,6 @@ router.post('/make-call', async (req, res) => {
           });
       console.log(call.sid);
 
-      // Send call status to the client
-      // if (req.app.locals.clientWs && req.app.locals.clientWs.readyState === req.app.locals.clientWs.OPEN) {
-      //   console.log('Sending call-initiated event to client');
-      //   req.app.locals.clientWs.send(JSON.stringify({
-      //     event: 'call-initiated',
-      //     phonenumber: contactItem.phonenumber,
-      //     callSid: call.sid,
-      //     contact_id: contactItem.contact_id, // Include contact_id
-      //     campaign_id: campaign_id,
-      //   }));
-      // }
       return call.sid;
     });
 
