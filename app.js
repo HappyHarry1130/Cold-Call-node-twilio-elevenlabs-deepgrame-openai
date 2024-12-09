@@ -192,51 +192,55 @@ app.post("/outcoming", async (req, res) => {
   avaliable_times_info = `Avaliable times to schedule: "${avaliable_times}"`;
   console.log(`avaliable_times_info : ${avaliable_times_info}`);
   let phonenumber = req.query.phonenumber; // Assuming contact_ID is passed in the query to identify the file
-  const filePath = `./scripts/${phonenumber}.txt`;
-  console.log(`filePath : ${filePath}`)
+  const content_prompt =req.query.prompt;
 
-  if (fs.existsSync(filePath)) {
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    const contactData = JSON.parse(fileContent);
+  if (true || fs.existsSync(filePath)) {
+    // const fileContent = fs.readFileSync(filePath, 'utf8');
+    // const contactData = JSON.parse(fileContent);
 
-    phonenumber = contactData.phonenumber;
-    todo = contactData.todo;
-    notodo = contactData.notodo;
-    fullname = contactData.fullname;
-    ai_profile_name = contactData.ai_profile_name;
-    email = contactData.email;
-    company = contactData.company;
-    contact_position = contactData.contact_position;
-    contact_company = contactData.contact_company;
-    contact_id = contactData.contact_id;
-    voiceId = contactData.voiceId;
-    style_exaggeration = contactData.style_exaggeration;
-    stability = contactData.stability;
-    similarity_boost = contactData.similarity_boost;
-    calendarlink = contactData.calendarlink;
-    campaign_id = contactData.campaign_id;
-    content = fs.readFileSync(`./scripts/${ai_profile_name}.txt`, 'utf8'); 
+    todo = "Call back the client";
+    notodo = "Do not share personal information";
+    fullname = "John Doe";
+    ai_profile_name = "Gill";
+    email = "johndoe@example.com";
+    company = "Example Corp";
+    contact_position = "Manager";
+    contact_company = "Example Corp";
+    contact_id = "1722703887022x843080806593462300";
+    voiceId = "YsMzSICQcD8ANXItP7BU";
+    style_exaggeration = 1.0;
+    stability = 0.8;
+    similarity_boost = 0.9;
+    calendarlink = "http://example.com/calendar";
+    campaign_id = "1722840799056x482480297004498940";
+    content = content_prompt;
     console.log(`Content_content : ${content}`)
   } else {
     console.error(`File  not found.`);
     res.status(404).send('Contact file not found');
     return;
   }
-
+  console.log(phonenumber);
+  
   try {
+    console.log(phonenumber);
     callstatus = "Not answered";
     const response = new VoiceResponse();
     const connect = response.connect();
     const uniqueConnectionId = `${phonenumber}-${Date.now()}`; // Unique identifier
-    connect.stream({ url: `wss://${process.env.SERVER}/connection` });
+    connect.stream({ url: `wss://62ab-188-43-33-253.ngrok-free.app/connection` });
+    console.log(connect)
     res.type("text/xml");
     res.end(response.toString());
+    console.log(process.env.SERVER)
+    
   } catch (err) {
     console.log(err);
   }
 });
 
 app.ws("/connection", (ws) => {
+  console.log('connected')
   var _contactID = contact_id;
   var _campaignID = campaign_id;
   var callstatus = "";
@@ -325,13 +329,14 @@ app.ws("/connection", (ws) => {
         ttsService.generate(
           {
             partialResponseIndex: null,
-            partialResponse: `Olá, ${fullname}. ${timeOfDay} Vejo que você trabalha para a ${contact_company}. Você ainda é responsável pelo ${contact_position}?`,
+            partialResponse: `Hello, ${fullname}. ${timeOfDay} I see you work for ${contact_company}. Are you still responsible for ${contact_position}?`,
           },
           0,
           _voiceId,
           stability,
           similarity_boost,
           style_exaggeration
+          
         );
         // Set RECORDING_ENABLED='true' in .env to record calls
         recordingService(ttsService, callSid).then(() => {
@@ -404,6 +409,7 @@ app.ws("/connection", (ws) => {
         similarity_boost,
         style_exaggeration
       );
+      // ttsService.generate(gptReply, icount);
     });
 
     ttsService.on("speech", (responseIndex, audio, label, icount) => {
