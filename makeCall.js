@@ -25,7 +25,6 @@ router.post('/make-call', async (req, res) => {
   const stability = req.body.stability;
   const similarity_boost = req.body.similarity_boost;
   const style_exaggeration = req.body.style_exaggeration;
-  const calendarlink = req.body.calendly_link;
   const content = req.body.content;
   const todo = req.body.todo;
   const notodo = req.body.notodo;
@@ -46,7 +45,6 @@ router.post('/make-call', async (req, res) => {
     stability: stability,
     similarity_boost: similarity_boost,
     style_exaggeration: style_exaggeration,
-    calendarlink: calendarlink,
     content : content,
     todo : todo,
     notodo : notodo,

@@ -69,123 +69,117 @@ const brazilHour = parseInt(formatter.format(new Date()), 10);
 
 let timeOfDay;
 if (brazilHour >= 5 && brazilHour < 12) {
-  timeOfDay = "Bom dia!";
+  timeOfDay = "Good morning!";
 } else if (brazilHour >= 12 && brazilHour < 18) {
-  timeOfDay = "Boa tarde!";
+  timeOfDay = "Good afternoon!";
 } else {
-  timeOfDay = "Boa noite!";
+  timeOfDay = "Good evening!";
 }
 
 
 
-app.post('/incoming/:phonenumber', (req, res) => {
+// app.post('/incoming/:phonenumber', (req, res) => {
 
-  phonenumber = req.params.phonenumber; 
+//   phonenumber = req.params.phonenumber; 
 
-  console.log(`Recieved: ${phonenumber}`);
-
-
-  if (phonenumber) {
-    const filePath = `./support/${phonenumber}.txt`;
-    console.log(`filePath : ${filePath}`)
+//   console.log(`Recieved: ${phonenumber}`);
 
 
-    // ... existing code ...
-    if (fs.existsSync(filePath)) {
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-      const contactData = JSON.parse(fileContent);
+//   if (phonenumber) {
+//     const filePath = `./support/${phonenumber}.txt`;
+//     console.log(`filePath : ${filePath}`)
 
 
-      todo = contactData.todo;
-      notodo = contactData.notodo;
-      // fullname = contactData.fullname;
-      ai_profile_name = contactData.ai_profile_name;
-      email = contactData.email;
-      company = contactData.company;
-      contact_position = contactData.contact_position;
-      contact_company = contactData.contact_company;
-      contact_id = contactData.contact_id;
-      voiceId = contactData.voiceId;
-      style_exaggeration = contactData.style_exaggeration;
-      stability = contactData.stability;
-      similarity_boost = contactData.similarity_boost;
-      calendarlink = contactData.calendarlink;
-      campaign_id = contactData.campaign_id;
-      content = fs.readFileSync(`./support/${phonenumber}_content.txt`, 'utf8'); 
-      console.log(`Content_content : ${content}`);
-    }
+//     // ... existing code ...
+//     if (fs.existsSync(filePath)) {
+//       const fileContent = fs.readFileSync(filePath, 'utf8');
+//       const contactData = JSON.parse(fileContent);
+
+
+//       todo = contactData.todo;
+//       notodo = contactData.notodo;
+//       // fullname = contactData.fullname;
+//       ai_profile_name = contactData.ai_profile_name;
+//       email = contactData.email;
+//       company = contactData.company;
+//       contact_position = contactData.contact_position;
+//       contact_company = contactData.contact_company;
+//       contact_id = contactData.contact_id;
+//       voiceId = contactData.voiceId;
+//       style_exaggeration = contactData.style_exaggeration;
+//       stability = contactData.stability;
+//       similarity_boost = contactData.similarity_boost;
+//       calendarlink = contactData.calendarlink;
+//       campaign_id = contactData.campaign_id;
+//       content = fs.readFileSync(`./support/${phonenumber}_content.txt`, 'utf8'); 
+//       console.log(`Content_content : ${content}`);
+//     }
     
-     else {
-      console.error(`File  not found.`);
-      res.status(404).send('Contact file not found');
-      return;
-    }
+//      else {
+//       console.error(`File  not found.`);
+//       res.status(404).send('Contact file not found');
+//       return;
+//     }
 
-    try {
-      callstatus = "Not answered";
-      const response = new VoiceResponse();
-      const connect = response.connect();
-      const uniqueConnectionId = `${phonenumber}-${Date.now()}`; // Unique identifier
-      connect.stream({ url: `wss://${process.env.SERVER}/realtime` });
-      res.type("text/xml");
-      res.end(response.toString());
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-   else {
-    twiml.say('Hello good');
-  }
-});
-// app.post("/incoming", async (req, res) => {
-//   const avaliable_times = await get_Avaliable_time();
-//   avaliable_times_info = `Avaliable times to schedule: "${avaliable_times}"`;
-//   console.log(`avaliable_times_info : ${avaliable_times_info}`);
-//   let phonenumber = req.query.phonenumber; // Assuming contact_ID is passed in the query to identify the file
-//   const filePath = `./scripts/${phonenumber}.txt`;
-//   console.log(`filePath : ${filePath}`)
-
-//   if (fs.existsSync(filePath)) {
-//     const fileContent = fs.readFileSync(filePath, 'utf8');
-//     const contactData = JSON.parse(fileContent);
-
-//     phonenumber = contactData.phonenumber;
-//     todo = contactData.todo;
-//     notodo = contactData.notodo;
-//     fullname = contactData.fullname;
-//     ai_profile_name = contactData.ai_profile_name;
-//     email = contactData.email;
-//     company = contactData.company;
-//     contact_position = contactData.contact_position;
-//     contact_company = contactData.contact_company;
-//     contact_id = contactData.contact_id;
-//     voiceId = contactData.voiceId;
-//     style_exaggeration = contactData.style_exaggeration;
-//     stability = contactData.stability;
-//     similarity_boost = contactData.similarity_boost;
-//     calendarlink = contactData.calendarlink;
-//     campaign_id = contactData.campaign_id;
-//     content = fs.readFileSync(`./scripts/${ai_profile_name}.txt`, 'utf8'); 
-//     console.log(`Content_content : ${content}`)
-//   } else {
-//     console.error(`File  not found.`);
-//     res.status(404).send('Contact file not found');
-//     return;
+//     try {
+//       callstatus = "Not answered";
+//       const response = new VoiceResponse();
+//       const connect = response.connect();
+//       const uniqueConnectionId = `${phonenumber}-${Date.now()}`; // Unique identifier
+//       connect.stream({ url: `wss://${process.env.SERVER}/realtime` });
+//       res.type("text/xml");
+//       res.end(response.toString());
+//     } catch (err) {
+//       console.log(err);
+//     }
 //   }
 
-//   try {
-//     callstatus = "Not answered";
-//     const response = new VoiceResponse();
-//     const connect = response.connect();
-//     const uniqueConnectionId = `${phonenumber}-${Date.now()}`; // Unique identifier
-//     connect.stream({ url: `wss://${process.env.SERVER}/connection` });
-//     res.type("text/xml");
-//     res.end(response.toString());
-//   } catch (err) {
-//     console.log(err);
+//    else {
+//     twiml.say('Hello good');
 //   }
 // });
+app.post("/incoming", async (req, res) => {
+  const avaliable_times = await get_Avaliable_time();
+  avaliable_times_info = `Avaliable times to schedule: "${avaliable_times}"`;
+  console.log(`avaliable_times_info : ${avaliable_times_info}`);
+  let phonenumber = req.query.phonenumber; // Assuming contact_ID is passed in the query to identify the file
+  const filePath = `./scripts/${phonenumber}.txt`;
+  console.log(`filePath : ${filePath}`)
+
+  if (fs.existsSync(filePath)) {
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const contactData = JSON.parse(fileContent);
+
+    phonenumber = contactData.phonenumber;
+    todo = ""
+    notodo = ""
+    email = contactData.email;
+    company = contactData.company;
+    contact_position = contactData.contact_position;
+    contact_company = contactData.contact_company;
+    contact_id = contactData.contact_id;
+    voiceId = contactData.voiceId;
+    campaign_id = contactData.campaign_id;
+    content = fs.readFileSync(`./scripts/${ai_profile_name}.txt`, 'utf8'); 
+    console.log(`Content_content : ${content}`)
+  } else {
+    console.error(`File  not found.`);
+    res.status(404).send('Contact file not found');
+    return;
+  }
+
+  try {
+    callstatus = "Not answered";
+    const response = new VoiceResponse();
+    const connect = response.connect();
+    const uniqueConnectionId = `${phonenumber}-${Date.now()}`; // Unique identifier
+    connect.stream({ url: `wss://${process.env.SERVER}/connection` });
+    res.type("text/xml");
+    res.end(response.toString());
+  } catch (err) {
+    console.log(err);
+  }
+});
 
 app.post("/outcoming", async (req, res) => {
   const avaliable_times = await get_Avaliable_time();
@@ -237,15 +231,9 @@ app.post("/outcoming", async (req, res) => {
 });
 
 app.ws("/connection", (ws) => {
-  var _contactID = contact_id;
-  var _campaignID = campaign_id;
-  var callstatus = "";
   var communicationtext = "";
   const re_phonenumber = phonenumber;
-  var contact_email = email;
-  var _full_name = fullname;
   var _voiceId = voiceId;
-  var _aiprofilename = ai_profile_name;
   var recordingSid = '';
   var recordingUrl = '';
   console.log("connection");
@@ -273,14 +261,14 @@ app.ws("/connection", (ws) => {
           })
           .catch((error) => console.error(error));
 
-        await updateData(communicationtext, _contactID, _campaignID, callstatus, recordingUrl);
-        const schedule_date_time = await getData_Calendly(
-          callstatus,
-          calendarlink
-        );
-        console.log(callstatus);
-        console.log(schedule_date_time);
-        makeschedule(schedule_date_time, _full_name, contact_email);
+        // await updateData(communicationtext, _contactID, _campaignID, callstatus, recordingUrl);
+        // const schedule_date_time = await getData_Calendly(
+        //   callstatus,
+        //   calendarlink
+        // );
+        // console.log(callstatus);
+        // console.log(schedule_date_time);
+        // makeschedule(schedule_date_time, _full_name, contact_email);
       } catch (error) {
         console.error("Error processing stop event:", error);
       }
@@ -318,14 +306,13 @@ app.ws("/connection", (ws) => {
           content,
           todo,
           notodo,
-          avaliable_times_info,
-          _full_name,
-          _aiprofilename
+          'David',
+          'Sean'
         );
         ttsService.generate(
           {
             partialResponseIndex: null,
-            partialResponse: `Olá, ${fullname}. ${timeOfDay} Vejo que você trabalha para a ${contact_company}. Você ainda é responsável pelo ${contact_position}?`,
+            partialResponse: `Hello, ${fullname}. ${timeOfDay}`,
           },
           0,
           _voiceId,
