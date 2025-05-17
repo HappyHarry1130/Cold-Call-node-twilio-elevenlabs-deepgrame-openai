@@ -17,6 +17,7 @@ const { chatGpt, getData_Calendly } = require("./services/checkschedule");
 const { get_Avaliable_time } = require("./services/getAvaliableTime");
 const { makeschedule } = require("./services/make-schedule");
 const makeCallRouter = require("./makeCall");
+const callStatusRouter = require("./routes/callStatus");
 const VoiceResponse = require("twilio").twiml.VoiceResponse;
 
 const fs = require('fs');
@@ -51,11 +52,15 @@ ExpressWs(app);
 const PORT = process.env.PORT || 3000;
 app.use(
   cors({
-    origin: "https://saleup.com.br",
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/api", makeCallRouter);
+app.use("/api", callStatusRouter);
 
 console.log(process.env.TWILIO_ACCOUNT_SID);
 
@@ -76,68 +81,6 @@ if (brazilHour >= 5 && brazilHour < 12) {
   timeOfDay = "Good evening!";
 }
 
-
-
-// app.post('/incoming/:phonenumber', (req, res) => {
-
-//   phonenumber = req.params.phonenumber; 
-
-//   console.log(`Recieved: ${phonenumber}`);
-
-
-//   if (phonenumber) {
-//     const filePath = `./support/${phonenumber}.txt`;
-//     console.log(`filePath : ${filePath}`)
-
-
-//     // ... existing code ...
-//     if (fs.existsSync(filePath)) {
-//       const fileContent = fs.readFileSync(filePath, 'utf8');
-//       const contactData = JSON.parse(fileContent);
-
-
-//       todo = contactData.todo;
-//       notodo = contactData.notodo;
-//       // fullname = contactData.fullname;
-//       ai_profile_name = contactData.ai_profile_name;
-//       email = contactData.email;
-//       company = contactData.company;
-//       contact_position = contactData.contact_position;
-//       contact_company = contactData.contact_company;
-//       contact_id = contactData.contact_id;
-//       voiceId = contactData.voiceId;
-//       style_exaggeration = contactData.style_exaggeration;
-//       stability = contactData.stability;
-//       similarity_boost = contactData.similarity_boost;
-//       calendarlink = contactData.calendarlink;
-//       campaign_id = contactData.campaign_id;
-//       content = fs.readFileSync(`./support/${phonenumber}_content.txt`, 'utf8'); 
-//       console.log(`Content_content : ${content}`);
-//     }
-    
-//      else {
-//       console.error(`File  not found.`);
-//       res.status(404).send('Contact file not found');
-//       return;
-//     }
-
-//     try {
-//       callstatus = "Not answered";
-//       const response = new VoiceResponse();
-//       const connect = response.connect();
-//       const uniqueConnectionId = `${phonenumber}-${Date.now()}`; // Unique identifier
-//       connect.stream({ url: `wss://${process.env.SERVER}/realtime` });
-//       res.type("text/xml");
-//       res.end(response.toString());
-//     } catch (err) {
-//       console.log(err);
-//     }
-//   }
-
-//    else {
-//     twiml.say('Hello good');
-//   }
-// });
 app.post("/incoming", async (req, res) => {
   const avaliable_times = await get_Avaliable_time();
   avaliable_times_info = `Avaliable times to schedule: "${avaliable_times}"`;
@@ -211,7 +154,7 @@ app.post("/outcoming", async (req, res) => {
     similarity_boost = contactData.similarity_boost;
     calendarlink = contactData.calendarlink;
     campaign_id = contactData.campaign_id;
-    content = fs.readFileSync(`./scripts/${ai_profile_name}.txt`, 'utf8'); 
+    content = contactData.content;
     console.log(`Content_content : ${content}`)
   } else {
     console.error(`File  not found.`);
@@ -304,23 +247,25 @@ app.ws("/connection", (ws) => {
         console.log(streamSid);
         streamService.setStreamSid(streamSid);
         gptService.setCallSid(callSid);
-        gptService.setUserContext(
-          content,
-          todo,
-          notodo,
-          'David',
-          'Sean'
-        );
+        console.log(`Content: ${content}`);
+
         ttsService.generate(
           {
             partialResponseIndex: null,
-            partialResponse: `Hello, ${fullname}. ${timeOfDay}`,
+            partialResponse: `${content}`,
           },
           0,
           _voiceId,
           stability,
           similarity_boost,
           style_exaggeration
+        );
+        gptService.setUserContext(
+          content,
+          todo,
+          notodo,
+          'David',
+          'Sean'
         );
         // Set RECORDING_ENABLED='true' in .env to record calls
         recordingService(ttsService, callSid).then(() => {
@@ -721,4 +666,3 @@ function connect() {
 }
 app.listen(PORT);
 console.log(`Server running on port ${PORT}`);
-

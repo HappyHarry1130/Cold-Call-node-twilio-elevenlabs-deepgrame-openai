@@ -76,23 +76,79 @@ router.post('/make-call', async (req, res) => {
   try {
     const callPromises = contact.map(async (contactItem) => {
         console.log(`phonenumber : ${contactItem.phonenumber}`);
+        
+        // Create call with status callback
         const call = await client.calls.create({
             url: `https://${process.env.SERVER}/outcoming?phonenumber=${encodeURIComponent(contactItem.phonenumber)}`,
-            to: contactItem.phonenumber, // Use matched phonenumber
+            to: contactItem.phonenumber,
             from: process.env.FROM_NUMBER,
             record: true,
-            method: 'POST'
-          });
-      console.log(call.sid);
+            method: 'POST',
+            statusCallback: `https://${process.env.SERVER}/api/call-status`,
+            statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+            statusCallbackMethod: 'POST'
+        });
 
-      return call.sid;
+        console.log('Created call with SID:', call.sid);
+
+        // Update call with status callback after creation
+        try {
+            await client.calls(call.sid)
+                .update({
+                    statusCallback: `https://${process.env.SERVER}/api/call-status?callSid=${call.sid}`,
+                    statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+                    statusCallbackMethod: 'POST'
+                });
+            console.log('Updated call with status callback:', call.sid);
+        } catch (updateError) {
+            console.error('Error updating call with status callback:', updateError);
+        }
+
+        // Save initial call status
+        const callStatus = {
+            id: Date.now(),
+            clientName: contactItem.fullname,
+            phone: contactItem.phonenumber,
+            status: 'pending',
+            template: contactItem.content,
+            timestamp: new Date().toISOString(),
+            direction: 'outbound',
+            metadata: {
+                contactId: contactItem.contact_id,
+                campaignId: contactItem.campaign_id,
+                aiProfile: contactItem.ai_profile_name
+            }
+        };
+
+        // Save to file for persistence
+        const statusDir = path.join(__dirname, 'call-statuses');
+        if (!fs.existsSync(statusDir)) {
+            fs.mkdirSync(statusDir);
+        }
+        fs.writeFileSync(
+            `${statusDir}/${call.sid}.json`,
+            JSON.stringify(callStatus, null, 2),
+            'utf8'
+        );
+
+        return call.sid;
     });
 
     const callSids = await Promise.all(callPromises);
-    res.status(200).send(`Calls initiated with SIDs: ${callSids.join(', ')}`);
+    res.status(200).json({
+        success: true,
+        data: {
+            callSids,
+            message: 'Calls initiated successfully'
+        }
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Failed to initiate calls');
+    res.status(500).json({
+        success: false,
+        message: 'Failed to initiate calls',
+        error: error.message
+    });
   }
 });
 
