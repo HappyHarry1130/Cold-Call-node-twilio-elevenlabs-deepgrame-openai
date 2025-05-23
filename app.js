@@ -118,9 +118,23 @@ app.post("/incoming", async (req, res) => {
   try {
     callstatus = "Not answered";
     const response = new VoiceResponse();
+    const gather = response.gather({
+      input: 'dtmf speech',
+      timeout: 5,
+      action: '/gather-handler',
+    });
+
+    const connectInGather = gather.connect();
+    connectInGather.stream({ url: `wss://${process.env.SERVER}/connection` });
+
+    response.say('입력이 없어 전화를 종료합니다.');
+
     const connect = response.connect();
-    const uniqueConnectionId = `${phonenumber}-${Date.now()}`; // Unique identifier
+    const uniqueConnectionId = `${phonenumber}-${Date.now()}`;
     connect.stream({ url: `wss://${process.env.SERVER}/connection` });
+
+    response.hangup();
+
     res.type("text/xml");
     res.end(response.toString());
   } catch (err) {
@@ -129,7 +143,6 @@ app.post("/incoming", async (req, res) => {
 });
 
 app.post("/outcoming", async (req, res) => {
-
   let phonenumber = req.query.phonenumber; // Assuming contact_ID is passed in the query to identify the file
   const filePath = `./scripts/${phonenumber}.txt`;
   console.log(`filePath : ${filePath}`)
@@ -165,9 +178,11 @@ app.post("/outcoming", async (req, res) => {
   try {
     callstatus = "Not answered";
     const response = new VoiceResponse();
+    
     const connect = response.connect();
-    const uniqueConnectionId = `${phonenumber}-${Date.now()}`; // Unique identifier
+    const uniqueConnectionId = `${phonenumber}-${Date.now()}`;
     connect.stream({ url: `wss://${process.env.SERVER}/connection` });
+    
     res.type("text/xml");
     res.end(response.toString());
   } catch (err) {
@@ -246,7 +261,7 @@ app.ws("/connection", (ws) => {
         console.log(`Received phonenumber: ${re_phonenumber}`);
         console.log(streamSid);
         streamService.setStreamSid(streamSid);
-        gptService.setCallSid(callSid);
+        // gptService.setCallSid(callSid);
         console.log(`Content: ${content}`);
 
         ttsService.generate(
@@ -255,18 +270,14 @@ app.ws("/connection", (ws) => {
             partialResponse: `${content}`,
           },
           0,
-          _voiceId,
-          stability,
-          similarity_boost,
-          style_exaggeration
         );
-        gptService.setUserContext(
-          content,
-          todo,
-          notodo,
-          'David',
-          'Sean'
-        );
+        // gptService.setUserContext(
+        //   content,
+        //   todo,
+        //   notodo,
+        //   'David',
+        //   'Sean'
+        // );
         // Set RECORDING_ENABLED='true' in .env to record calls
         recordingService(ttsService, callSid).then(() => {
           console.log(
@@ -274,7 +285,7 @@ app.ws("/connection", (ws) => {
           );
         });
       } else if (msg.event === "media") {
-        transcriptionService.send(msg.media.payload);
+        // transcriptionService.send(msg.media.payload);
       } else if (msg.event === "mark") {
         const label = msg.mark.name;
         console.log(
@@ -299,27 +310,27 @@ app.ws("/connection", (ws) => {
       }
     });
 
-    transcriptionService.on("transcription", async (text) => {
-      if (!text) {
-        return;
-      }
-      if (text.includes("UtteranceEnd")) {
-        hangUpCall(callSid);
-      }
-      console.log(
-        `Interaction ${interactionCount} : STT -> GPT: ${text}`.yellow
-      );
-      console.log(`phonenumber : ${re_phonenumber}`);
-      communicationtext += `Contact: ${text}\n`;
+    // transcriptionService.on("transcription", async (text) => {
+    //   if (!text) {
+    //     return;
+    //   }
+    //   if (text.includes("UtteranceEnd")) {
+    //     hangUpCall(callSid);
+    //   }
+    //   console.log(
+    //     `Interaction ${interactionCount} : STT -> GPT: ${text}`.yellow
+    //   );
+    //   console.log(`phonenumber : ${re_phonenumber}`);
+    //   communicationtext += `Contact: ${text}\n`;
 
-      if (interactionCount !== currentIcount) {
-        gptService.stop(currentIcount);
-        currentIcount = interactionCount;
-      }
+    //   if (interactionCount !== currentIcount) {
+    //     gptService.stop(currentIcount);
+    //     currentIcount = interactionCount;
+    //   }
 
-      gptService.completion(text, interactionCount);
-      interactionCount += 1;
-    });
+    //   gptService.completion(text, interactionCount);
+    //   interactionCount += 1;
+    // });
 
     gptService.on("gptreply", async (gptReply, icount) => {
       console.log(
@@ -333,10 +344,6 @@ app.ws("/connection", (ws) => {
       ttsService.generate(
         gptReply,
         icount,
-        _voiceId,
-        stability,
-        similarity_boost,
-        style_exaggeration
       );
     });
 
@@ -428,22 +435,18 @@ app.ws("/connection_incoming", (ws) => {
         console.log(streamSid);
         streamService.setStreamSid(streamSid);
         gptService.setCallSid(callSid);
-        gptService.setUserContext(
-          content,
-          todo,
-          notodo,
-          avaliable_times_info,
-        );
+        // gptService.setUserContext(
+        //   content,
+        //   todo,
+        //   notodo,
+        //   avaliable_times_info,
+        // );
         ttsService.generate(
           {
             partialResponseIndex: null,
             partialResponse: `Olá, ${timeOfDay}`,
           },
           0,
-          _voiceId,
-          stability,
-          similarity_boost,
-          style_exaggeration
         );
         recordingService(ttsService, callSid).then(() => {
           console.log(
@@ -451,7 +454,7 @@ app.ws("/connection_incoming", (ws) => {
           );
         });
       } else if (msg.event === "media") {
-        transcriptionService.send(msg.media.payload);
+        // transcriptionService.send(msg.media.payload);
       } else if (msg.event === "mark") {
         const label = msg.mark.name;
         console.log(
@@ -494,7 +497,7 @@ app.ws("/connection_incoming", (ws) => {
         currentIcount = interactionCount;
       }
 
-      gptService.completion(text, interactionCount);
+      // gptService.completion(text, interactionCount);
       interactionCount += 1;
     });
 
@@ -510,10 +513,6 @@ app.ws("/connection_incoming", (ws) => {
       ttsService.generate(
         gptReply,
         icount,
-        _voiceId,
-        stability,
-        similarity_boost,
-        style_exaggeration
       );
     });
 

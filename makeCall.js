@@ -45,7 +45,7 @@ router.post('/make-call', async (req, res) => {
     stability: stability,
     similarity_boost: similarity_boost,
     style_exaggeration: style_exaggeration,
-    content : content,
+    content : content[index].trim(),
     todo : todo,
     notodo : notodo,
     campaign_id : campaign_id,
